@@ -235,8 +235,8 @@ void PIMKernel::programCrf(vector<PIMCmd>& cmds)
     addBarrier();
 }
 
-void PIMKernel::setCrf(BurstType* bst, bool pim_op, bool use_all_grf, int crf_toggle_cond,
-                       bool grfA_zero, bool grfB_zero)
+void PIMKernel::setControl(BurstType* bst, bool pim_op, bool use_all_grf, int crf_toggle_cond,
+                           bool grfA_zero, bool grfB_zero)
 {
     bst->u8Data_[0] = pim_op;
     bst->u8Data_[10] = use_all_grf;
@@ -398,7 +398,7 @@ void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool
         pim_cmds =
             PIMCmdGen::getPIMCmds(KernelType::GEMV, 0, num_jump_of_odd_bank, num_jump_of_even_bank);
     }
-    setCrf(&bst_hab_pim_, true, false, 0, false, true);
+    setControl(&bst_hab_pim_, true, false, 0, false, true);
     parkIn();
     changePIMMode(dramMode::SB, dramMode::HAB);
     programCrf(pim_cmds);
@@ -519,8 +519,8 @@ void PIMKernel::executeEltwise(int dim, pimBankType pb_type, KernelType ktype, i
             break;
     }
 
-    setCrf(&bst_hab_pim_, true, use_all_grf_, crf_toggle_cond, false, false);
-    setCrf(&bst_hab_, false, use_all_grf_, crf_toggle_cond, false, false);
+    setControl(&bst_hab_pim_, true, use_all_grf_, crf_toggle_cond, false, false);
+    setControl(&bst_hab_, false, use_all_grf_, crf_toggle_cond, false, false);
 
     parkIn();
     changePIMMode(dramMode::SB, dramMode::HAB);

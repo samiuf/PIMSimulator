@@ -84,7 +84,7 @@ class PIMKernel
     void programSrf();
     */
     void programCrf(vector<PIMCmd>& cmds);
-    void setCrf(BurstType* bst, bool op, bool use_all_grf, int ctc, bool grfA_zero, bool grfB_zero);
+    void setControl(BurstType* bst, bool op, bool use_all_grf, int ctc, bool grfA_z, bool grfB_z);
     unsigned getResultColGemv(int input_dim, int output_dim);
     void changeBank(pimBankType bank_types, int& cidx, int& rank, int& bg, int& bank,
                     unsigned& startingRow, unsigned& startingCol, unsigned& row, unsigned& col);
