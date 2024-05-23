@@ -37,7 +37,6 @@ class PIMKernel
           num_banks_(getConfigParam(UINT, "NUM_BANKS")),
           num_pim_blocks_(getConfigParam(UINT, "NUM_PIM_BLOCKS")),
           num_bank_groups_(getConfigParam(UINT, "NUM_BANK_GROUPS")),
-          use_all_grf_(false),
           srf_bst_(NULL),
           cycle_(0)
     {
@@ -60,7 +59,6 @@ class PIMKernel
     int transaction_size_;
     int num_pim_chans_, num_pim_ranks_;
     int num_grfA_, num_grfB_, num_grf_;
-    bool use_all_grf_;
     shared_ptr<PIMAddrManager> pim_addr_mgr_;
 
     void addBarrier();
@@ -84,7 +82,7 @@ class PIMKernel
     void programSrf();
     */
     void programCrf(vector<PIMCmd>& cmds);
-    void setControl(BurstType* bst, bool op, bool use_all_grf, int ctc, bool grfA_z, bool grfB_z);
+    void setControl(BurstType* bst, bool op, int crf_toggle_cond, bool grfA_zero, bool grfB_zero);
     unsigned getResultColGemv(int input_dim, int output_dim);
     void changeBank(pimBankType bank_types, int& cidx, int& rank, int& bg, int& bank,
                     unsigned& startingRow, unsigned& startingCol, unsigned& row, unsigned& col);
@@ -118,6 +116,21 @@ class PIMKernel
     vector<int> pim_ranks_;
     PIMMode mode_;
     shared_ptr<MultiChannelMemorySystem> mem_;
+    int inline getToggleCond(pimBankType pb_type = pimBankType::ALL_BANK)
+    {
+        // set Toggle Condition
+        switch (pb_type)
+        {
+            case pimBankType::EVEN_BANK:
+                return 2;
+            case pimBankType::ODD_BANK:
+                return 1;
+            case pimBankType::ALL_BANK:
+                return 0;
+            default:
+                return -1;
+        }
+    }
 };
 
 #endif

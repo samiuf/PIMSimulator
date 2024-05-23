@@ -105,7 +105,7 @@ void Rank::receiveFromBus(BusPacket* packet)
     {
         packet->print(currentClockCycle, false);
     }
-    if (!(packet->row & 1 << 12))
+    if (!pimRank->isAccessibleRA(packet->row))
     {
         check(packet);
         updateState(packet);
@@ -327,7 +327,7 @@ void Rank::readSb(BusPacket* packet)
                 PRINT(OUTLOG_GRF_B("READ_GRF_B"));
             }
         }
-        else if (packet->row & (1 << 12))
+        else if (pimRank->isAccessibleRA(packet->row))
         {
             PRINTC(GRAY, OUTLOG_ALL("READ"));
         }
@@ -356,7 +356,7 @@ void Rank::writeSb(BusPacket* packet)
 {
     if (DEBUG_CMD_TRACE)
     {
-        if (packet->row == 0x3fff || packet->row & (1 << 12))
+        if (packet->row == 0x3fff || pimRank->isAccessibleRA(packet->row))
         {
             PRINTC(GRAY, OUTLOG_ALL("WRITE"));
         }
@@ -367,7 +367,7 @@ void Rank::writeSb(BusPacket* packet)
     }
 
 #ifndef NO_STORAGE
-    if (!(packet->row == 0x3fff) && !(packet->row & (1 << 12)))
+    if (!(packet->row == 0x3fff) && !pimRank->isAccessibleRA(packet->row))
         banks[packet->bank].write(packet);
 #endif
 }

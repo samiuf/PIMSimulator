@@ -29,7 +29,6 @@ PIMRank::PIMRank(ostream& simLog, Configuration& configuration)
       numJumpToBeTaken_(-1),
       lastRepeatIdx_(-1),
       numRepeatToBeDone_(-1),
-      useAllGrf_(true),
       crfExit_(false),
       config(configuration),
       pimBlocks(getConfigParam(UINT, "NUM_PIM_BLOCKS"),
@@ -96,8 +95,7 @@ void PIMRank::controlPIM(BusPacket* packet)
     pimOpMode_ = packet->data->u8Data_[0] & 1;
     toggleEvenBank_ = !(packet->data->u8Data_[16] & 1);
     toggleOddBank_ = !(packet->data->u8Data_[16] & 2);
-    toggleRa12h_ = (packet->data->u8Data_[16] & 4);
-    useAllGrf_ = packet->data->u8Data_[10] & 1;
+    toggleRa13h_ = (packet->data->u8Data_[16] & 4);
 
     if (pimOpMode_)
     {
@@ -118,7 +116,7 @@ bool PIMRank::isToggleCond(BusPacket* packet)
 {
     if (pimOpMode_ && !crfExit_)
     {
-        if (toggleRa12h_)
+        if (toggleRa13h_)
         {
             if (toggleEvenBank_ && ((packet->bank & 1) == 0))
                 return true;
@@ -126,7 +124,7 @@ bool PIMRank::isToggleCond(BusPacket* packet)
                 return true;
             return false;
         }
-        else if (!toggleRa12h_ && !(packet->row & (1 << 12)))
+        else if (!toggleRa13h_ && !isAccessibleRA(packet->row))
         {
             if (toggleEvenBank_ && ((packet->bank & 1) == 0))
                 return true;
@@ -144,7 +142,7 @@ bool PIMRank::isToggleCond(BusPacket* packet)
 
 void PIMRank::readHab(BusPacket* packet)
 {
-    if (packet->row & (1 << 12))  // ignored
+    if (isAccessibleRA(packet->row))  // ignored
     {
         PRINTC(GRAY, OUTLOG_ALL("READ"));
     }
@@ -152,27 +150,11 @@ void PIMRank::readHab(BusPacket* packet)
     {
         PRINTC(GRAY, OUTLOG_ALL("BANK_TO_PIM"));
 #ifndef NO_STORAGE
-        int grf_id;
-        if (useAllGrf_)
+        int grf_id = getGrfIdx(packet->column);
+        for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
         {
-            grf_id = packet->column & 0xf;
-            for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
-            {
-                rank->banks[pb * 2 + packet->bank].read(packet);
-                if (grf_id < 8)
-                    pimBlocks[pb].grfA[grf_id] = *(packet->data);
-                else
-                    pimBlocks[pb].grfB[grf_id - 8] = *(packet->data);
-            }
-        }
-        else
-        {
-            grf_id = getGrfIdx(packet->column);
-            for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
-            {
-                rank->banks[pb * 2 + packet->bank].read(packet);
-                pimBlocks[pb].grfB[grf_id] = *(packet->data);
-            }
+            rank->banks[pb * 2 + packet->bank].read(packet);
+            pimBlocks[pb].grfB[grf_id] = *(packet->data);
         }
 #endif
     }
@@ -217,7 +199,7 @@ void PIMRank::writeHab(BusPacket* packet)
             for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++) pimBlocks[pb].srf = *(packet->data);
         }
     }
-    else if (packet->row & 1 << 12)
+    else if (isAccessibleRA(packet->row))
     {
         PRINTC(GRAY, OUTLOG_ALL("WRITE"));
     }
@@ -226,33 +208,18 @@ void PIMRank::writeHab(BusPacket* packet)
         PRINTC(GREEN, OUTLOG_ALL("PIM_TO_BANK"));
 
 #ifndef NO_STORAGE
-        if (useAllGrf_)
+        int grf_id = getGrfIdx(packet->column);
+        for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
         {
-            int grf_id = packet->column & 0xf;
-            for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
+            if (packet->bank == 0)
             {
-                if (grf_id < 8)
-                    *(packet->data) = pimBlocks[pb].grfA[grf_id];
-                else
-                    *(packet->data) = pimBlocks[pb].grfB[grf_id - 8];
-                rank->banks[pb * 2 + packet->bank].write(packet);
+                *(packet->data) = pimBlocks[pb].grfA[grf_id];
+                rank->banks[pb * 2].write(packet);  // basically read from bank;
             }
-        }
-        else
-        {
-            int grf_id = getGrfIdx(packet->column);
-            for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++)
+            else if (packet->bank == 1)
             {
-                if (packet->bank == 0)
-                {
-                    *(packet->data) = pimBlocks[pb].grfA[grf_id];
-                    rank->banks[pb * 2].write(packet);  // basically read from bank;
-                }
-                else if (packet->bank == 1)
-                {
-                    *(packet->data) = pimBlocks[pb].grfB[grf_id];
-                    rank->banks[pb * 2 + 1].write(packet);  // basically read from bank.
-                }
+                *(packet->data) = pimBlocks[pb].grfB[grf_id];
+                rank->banks[pb * 2 + 1].write(packet);  // basically read from bank.
             }
         }
 #endif
@@ -358,7 +325,7 @@ void PIMRank::writeOpd(int pb, BurstType& bst, PIMOpdType type, BusPacket* packe
 void PIMRank::doPIM(BusPacket* packet)
 {
     PIMCmd cCmd;
-    packet->row = packet->row & ((1 << 12) - 1);
+    packet->row = masked2accessibleRA(packet->row);
     do
     {
         cCmd.fromInt(crf.data[pimPC_]);

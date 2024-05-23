@@ -64,7 +64,7 @@ class PIMRank : public SimulatorObject
     ostream& dramsimLog;
     Configuration& config;
     int pimPC_, lastJumpIdx_, numJumpToBeTaken_, lastRepeatIdx_, numRepeatToBeDone_;
-    bool pimOpMode_, toggleEvenBank_, toggleOddBank_, toggleRa12h_, useAllGrf_, crfExit_;
+    bool pimOpMode_, toggleEvenBank_, toggleOddBank_, toggleRa13h_, crfExit_;
 
   public:
     PIMRank(ostream& simLog, Configuration& configuration);
@@ -104,6 +104,14 @@ class PIMRank : public SimulatorObject
     unsigned inline getGrfIdxHigh(unsigned r, unsigned c)
     {
         return ((r & 0x1) << 2 | ((c >> 3) & 0x3));
+    }
+    unsigned inline isAccessibleRA(unsigned row)
+    {
+        return (row & (1 << 12));
+    }
+    unsigned inline masked2accessibleRA(unsigned row)
+    {
+        return (row & ((1 << 12) - 1));
     }
 
     Rank* rank;

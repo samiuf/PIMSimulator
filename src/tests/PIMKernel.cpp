@@ -235,11 +235,10 @@ void PIMKernel::programCrf(vector<PIMCmd>& cmds)
     addBarrier();
 }
 
-void PIMKernel::setControl(BurstType* bst, bool pim_op, bool use_all_grf, int crf_toggle_cond,
-                           bool grfA_zero, bool grfB_zero)
+void PIMKernel::setControl(BurstType* bst, bool pim_op, int crf_toggle_cond, bool grfA_zero,
+                           bool grfB_zero)
 {
     bst->u8Data_[0] = pim_op;
-    bst->u8Data_[10] = use_all_grf;
     bst->u8Data_[16] = crf_toggle_cond;
     bst->u8Data_[20] = grfA_zero;
     bst->u8Data_[21] = grfB_zero;
@@ -398,7 +397,7 @@ void PIMKernel::executeGemv(NumpyBurstType* w_data, NumpyBurstType* i_data, bool
         pim_cmds =
             PIMCmdGen::getPIMCmds(KernelType::GEMV, 0, num_jump_of_odd_bank, num_jump_of_even_bank);
     }
-    setControl(&bst_hab_pim_, true, false, 0, false, true);
+    setControl(&bst_hab_pim_, true, getToggleCond(), false, true);
     parkIn();
     changePIMMode(dramMode::SB, dramMode::HAB);
     programCrf(pim_cmds);
@@ -501,26 +500,8 @@ void PIMKernel::executeEltwise(int dim, pimBankType pb_type, KernelType ktype, i
     int num_jump_to_be_taken = num_tile - 1;
     vector<PIMCmd> pim_cmds = PIMCmdGen::getPIMCmds(ktype, num_jump_to_be_taken, 0, 0);
 
-    int crf_toggle_cond = -1;
-    // set Toggle Condition
-    switch (pb_type)
-    {
-        case pimBankType::EVEN_BANK:
-            crf_toggle_cond = 2;
-            break;
-        case pimBankType::ODD_BANK:
-            crf_toggle_cond = 1;
-            break;
-        case pimBankType::ALL_BANK:
-            crf_toggle_cond = 0;
-            break;
-        default:
-            crf_toggle_cond = -1;
-            break;
-    }
-
-    setControl(&bst_hab_pim_, true, use_all_grf_, crf_toggle_cond, false, false);
-    setControl(&bst_hab_, false, use_all_grf_, crf_toggle_cond, false, false);
+    setControl(&bst_hab_pim_, true, getToggleCond(pb_type), false, false);
+    setControl(&bst_hab_, false, getToggleCond(pb_type), false, false);
 
     parkIn();
     changePIMMode(dramMode::SB, dramMode::HAB);
