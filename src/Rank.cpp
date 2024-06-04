@@ -110,7 +110,7 @@ void Rank::receiveFromBus(BusPacket* packet)
         check(packet);
         updateState(packet);
     }
-    execute(packet);
+    sendToBank(packet);
 }
 
 void Rank::checkBank(BusPacketType type, int bank, int row)
@@ -372,7 +372,7 @@ void Rank::writeSb(BusPacket* packet)
 #endif
 }
 
-void Rank::execute(BusPacket* packet)
+void Rank::sendToBank(BusPacket* packet)
 {
     switch (packet->busPacketType)
     {

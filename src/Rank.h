@@ -65,7 +65,7 @@ class Rank : public SimulatorObject
     void receiveFromBus(BusPacket* packet);
     void check(BusPacket* packet);
     void updateState(BusPacket* packet);
-    void execute(BusPacket* packet);
+    void sendToBank(BusPacket* packet);
 
     void checkBank(BusPacketType type, int bank, int row);
     void updateBank(BusPacketType type, int bank, int row, bool targetBank, bool targetBankgroup);
