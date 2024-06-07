@@ -28,10 +28,11 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "MemoryController.h"
+
 #include <iostream>
 
 #include "AddressMapping.h"
-#include "MemoryController.h"
 #include "MemorySystem.h"
 
 #define SEQUENTIAL(rank, bank) (rank * config.NUM_BANKS) + bank

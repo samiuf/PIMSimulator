@@ -2,6 +2,7 @@
 #define __CLOCKDOMAIN__
 
 #include <stdint.h>
+
 #include <cmath>
 #include <iostream>
 

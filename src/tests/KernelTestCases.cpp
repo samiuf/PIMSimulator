@@ -11,6 +11,7 @@
  **************************************************************************************************/
 
 #include "tests/KernelTestCases.h"
+
 #include "gtest/gtest.h"
 #include "tests/PIMKernel.h"
 
@@ -52,9 +53,9 @@ TEST_F(PIMKernelFixture, gemv_tree)
         reduced_result_[i / 16].fp16Data_[i % 16] = temp_fp16[0];
     }
 
-    delete result_;
-    delete reduced_result_;
-    delete temp_fp16;
+    delete[] result_;
+    delete[] reduced_result_;
+    delete[] temp_fp16;
     delete dim_data;
 }
 
@@ -77,7 +78,7 @@ TEST_F(PIMKernelFixture, gemv)
                    dim_data->getNumElementsPerBlocks());
 
     delete[] result_;
-    delete reduced_result_;
+    delete[] reduced_result_;
     delete dim_data;
 }
 

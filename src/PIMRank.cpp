@@ -10,12 +10,13 @@
  * only)
  **************************************************************************************************/
 
+#include "PIMRank.h"
+
 #include <bitset>
 #include <iostream>
 
 #include "AddressMapping.h"
 #include "PIMCmd.h"
-#include "PIMRank.h"
 
 using namespace std;
 using namespace DRAMSim;
@@ -124,7 +125,7 @@ bool PIMRank::isToggleCond(BusPacket* packet)
                 return true;
             return false;
         }
-        else if (!toggleRa13h_ && !isAccessibleRA(packet->row))
+        else if (!toggleRa13h_ && !isReservedRA(packet->row))
         {
             if (toggleEvenBank_ && ((packet->bank & 1) == 0))
                 return true;
@@ -142,7 +143,7 @@ bool PIMRank::isToggleCond(BusPacket* packet)
 
 void PIMRank::readHab(BusPacket* packet)
 {
-    if (isAccessibleRA(packet->row))  // ignored
+    if (isReservedRA(packet->row))  // ignored
     {
         PRINTC(GRAY, OUTLOG_ALL("READ"));
     }
@@ -162,7 +163,7 @@ void PIMRank::readHab(BusPacket* packet)
 
 void PIMRank::writeHab(BusPacket* packet)
 {
-    if (packet->row == 0x3fff)  // WRIO to PIM Broadcasting
+    if (packet->row == config.PIM_REG_RA)  // WRIO to PIM Broadcasting
     {
         if (packet->column == 0x00)
             controlPIM(packet);
@@ -199,7 +200,7 @@ void PIMRank::writeHab(BusPacket* packet)
             for (int pb = 0; pb < config.NUM_PIM_BLOCKS; pb++) pimBlocks[pb].srf = *(packet->data);
         }
     }
-    else if (isAccessibleRA(packet->row))
+    else if (isReservedRA(packet->row))
     {
         PRINTC(GRAY, OUTLOG_ALL("WRITE"));
     }
@@ -252,14 +253,14 @@ void PIMRank::readOpd(int pb, BurstType& bst, PIMOpdType type, BusPacket* packet
             bst = *(packet->data);
             return;
         case PIMOpdType::GRF_A:
-            if (is_auto)
-                bst = pimBlocks[pb].grfA[(is_mac) ? getGrfIdxHigh(packet->row, packet->column)
-                                                  : getGrfIdx(packet->column)];
-            else
-                bst = pimBlocks[pb].grfA[idx];
+            bst = pimBlocks[pb].grfA[(is_auto) ? getGrfIdx(packet->column) : idx];
             return;
         case PIMOpdType::GRF_B:
-            bst = pimBlocks[pb].grfB[(is_auto) ? getGrfIdx(packet->column) : idx];
+            if (is_auto)
+                bst = pimBlocks[pb].grfB[(is_mac) ? getGrfIdxHigh(packet->row, packet->column)
+                                                  : getGrfIdx(packet->column)];
+            else
+                bst = pimBlocks[pb].grfB[idx];
             return;
         case PIMOpdType::SRF_M:
             bst.set(pimBlocks[pb].srf.fp16Data_[idx]);
@@ -301,15 +302,12 @@ void PIMRank::writeOpd(int pb, BurstType& bst, PIMOpdType type, BusPacket* packe
             rank->banks[pb * 2 + 1].write(packet);  // basically read from bank.
             return;
         case PIMOpdType::GRF_A:
-            if (is_auto)
-                pimBlocks[pb].grfA[(is_mac) ? getGrfIdxHigh(packet->row, packet->column)
-                                            : getGrfIdx(packet->column)] = bst;
-            else
-                pimBlocks[pb].grfA[idx] = bst;
+            pimBlocks[pb].grfA[(is_auto) ? getGrfIdx(packet->column) : idx] = bst;
             return;
         case PIMOpdType::GRF_B:
             if (is_auto)
-                pimBlocks[pb].grfB[getGrfIdx(packet->column)] = bst;
+                pimBlocks[pb].grfB[(is_mac) ? getGrfIdxHigh(packet->row, packet->column)
+                                            : getGrfIdx(packet->column)] = bst;
             else
                 pimBlocks[pb].grfB[idx] = bst;
             return;

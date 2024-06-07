@@ -105,13 +105,13 @@ class PIMRank : public SimulatorObject
     {
         return ((r & 0x1) << 2 | ((c >> 3) & 0x3));
     }
-    unsigned inline isAccessibleRA(unsigned row)
+    unsigned inline isReservedRA(unsigned row)
     {
-        return (row & (1 << 12));
+        return (row & (1 << 13));
     }
     unsigned inline masked2accessibleRA(unsigned row)
     {
-        return (row & ((1 << 12) - 1));
+        return (row & ((1 << 13) - 1));
     }
 
     Rank* rank;

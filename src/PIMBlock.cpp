@@ -10,10 +10,11 @@
  * only)
  **************************************************************************************************/
 
+#include "PIMBlock.h"
+
 #include <sstream>
 #include <string>
 
-#include "PIMBlock.h"
 #include "PrintMacros.h"
 #include "SystemConfiguration.h"
 #include "half.h"

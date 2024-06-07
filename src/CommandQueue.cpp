@@ -28,10 +28,11 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "CommandQueue.h"
+
 #include <assert.h>
 
 #include "AddressMapping.h"
-#include "CommandQueue.h"
 #include "MemoryController.h"
 
 using namespace DRAMSim;

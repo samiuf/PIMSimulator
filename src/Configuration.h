@@ -91,6 +91,10 @@ class Configuration
             throw invalid_argument("Not allowed zero channel");
         }
 
+        PIM_REG_RA = 0x3fff;
+        PIM_ABMR_RA = 0x27ff;
+        PIM_SBMR_RA = 0x2fff;
+
         setDebugConfiguration();
         setOutputConfiguration();
     }
@@ -178,6 +182,10 @@ class Configuration
     unsigned WRITE_TO_READ_DELAY_B_LONG;
     unsigned WRITE_TO_READ_DELAY_B_SHORT;
     unsigned WRITE_TO_READ_DELAY_R;
+
+    uint32_t PIM_REG_RA;
+    uint32_t PIM_ABMR_RA;
+    uint32_t PIM_SBMR_RA;
 
     AddrMapping& addrMapping;
 };

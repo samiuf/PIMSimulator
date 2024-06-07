@@ -28,10 +28,11 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "AddressMapping.h"
+
 #include <bitset>
 #include <iostream>
 
-#include "AddressMapping.h"
 #include "SystemConfiguration.h"
 #include "Utils.h"
 

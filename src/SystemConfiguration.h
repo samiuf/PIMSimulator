@@ -32,6 +32,7 @@
 #define SYSCONFIG_H
 
 #include <stdint.h>
+
 #include <cstdlib>
 #include <cstring>
 #include <fstream>

@@ -28,11 +28,12 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "Rank.h"
+
 #include <iostream>
 
 #include "AddressMapping.h"
 #include "MemoryController.h"
-#include "Rank.h"
 
 using namespace std;
 using namespace DRAMSim;
@@ -56,7 +57,7 @@ Rank::Rank(ostream& simLog, Configuration& configuration)
     currentClockCycle = 0;
     abmr1Even_ = abmr1Odd_ = abmr2Even_ = abmr2Odd_ = sbmr1_ = sbmr2_ = false;
 
-    pimRank = new PIMRank(dramsimLog, config);
+    pimRank = make_shared<PIMRank>(dramsimLog, config);
     pimRank->attachRank(this);
 }
 
@@ -105,7 +106,7 @@ void Rank::receiveFromBus(BusPacket* packet)
     {
         packet->print(currentClockCycle, false);
     }
-    if (!pimRank->isAccessibleRA(packet->row))
+    if (!pimRank->isReservedRA(packet->row))
     {
         check(packet);
         updateState(packet);
@@ -316,7 +317,7 @@ void Rank::readSb(BusPacket* packet)
 {
     if (DEBUG_CMD_TRACE)
     {
-        if (packet->row == 0x3fff)
+        if (packet->row == config.PIM_REG_RA)
         {
             if (0x08 <= packet->column && packet->column <= 0x0f)
             {
@@ -327,7 +328,7 @@ void Rank::readSb(BusPacket* packet)
                 PRINT(OUTLOG_GRF_B("READ_GRF_B"));
             }
         }
-        else if (pimRank->isAccessibleRA(packet->row))
+        else if (pimRank->isReservedRA(packet->row))
         {
             PRINTC(GRAY, OUTLOG_ALL("READ"));
         }
@@ -338,7 +339,7 @@ void Rank::readSb(BusPacket* packet)
     }
 
 #ifndef NO_STORAGE
-    if (packet->row == 0x3fff)
+    if (packet->row == config.PIM_REG_RA)
     {
         if (0x08 <= packet->column && packet->column <= 0x0f)
             *(packet->data) = pimRank->pimBlocks[packet->bank / 2].grfA[packet->column - 0x8];
@@ -356,7 +357,7 @@ void Rank::writeSb(BusPacket* packet)
 {
     if (DEBUG_CMD_TRACE)
     {
-        if (packet->row == 0x3fff || pimRank->isAccessibleRA(packet->row))
+        if (packet->row == config.PIM_REG_RA || pimRank->isReservedRA(packet->row))
         {
             PRINTC(GRAY, OUTLOG_ALL("WRITE"));
         }
@@ -367,7 +368,7 @@ void Rank::writeSb(BusPacket* packet)
     }
 
 #ifndef NO_STORAGE
-    if (!(packet->row == 0x3fff) && !pimRank->isAccessibleRA(packet->row))
+    if (!(packet->row == config.PIM_REG_RA) && !pimRank->isReservedRA(packet->row))
         banks[packet->bank].write(packet);
 #endif
 }
@@ -401,7 +402,8 @@ void Rank::sendToBank(BusPacket* packet)
             {
                 PRINTC(getModeColor(), OUTLOG_ALL("ACTIVATE") << " tag : " << packet->tag);
             }
-            if (mode_ == dramMode::SB && packet->row == 0x17ff && packet->column == 0x1f)
+            if (mode_ == dramMode::SB && packet->row == config.PIM_ABMR_RA &&
+                packet->column == 0x1f)
             {
                 abmr1Even_ = (packet->bank == 0) ? true : abmr1Even_;
                 abmr1Odd_ = (packet->bank == 1) ? true : abmr1Odd_;
@@ -434,7 +436,7 @@ void Rank::sendToBank(BusPacket* packet)
                 }
             }
 
-            if (mode_ == dramMode::HAB && packet->row == 0x1fff)
+            if (mode_ == dramMode::HAB && packet->row == config.PIM_SBMR_RA)
             {
                 sbmr1_ = (packet->bank == 0) ? true : sbmr1_;
                 sbmr2_ = (packet->bank == 1) ? true : sbmr2_;

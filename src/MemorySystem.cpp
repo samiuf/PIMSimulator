@@ -28,9 +28,9 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
-#include <unistd.h>
-
 #include "MemorySystem.h"
+
+#include <unistd.h>
 
 using namespace std;
 

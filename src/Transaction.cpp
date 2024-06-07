@@ -28,10 +28,11 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "Transaction.h"
+
 #include <string>
 
 #include "PrintMacros.h"
-#include "Transaction.h"
 
 using std::dec;
 using std::endl;

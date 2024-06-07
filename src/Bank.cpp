@@ -28,9 +28,10 @@
  *  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *********************************************************************************/
 
+#include "Bank.h"
+
 #include <memory>
 
-#include "Bank.h"
 #include "BusPacket.h"
 
 using namespace std;
