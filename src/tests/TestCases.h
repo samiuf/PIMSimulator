@@ -134,6 +134,7 @@ class DataDim
   private:
     unsigned getPrecisionToByte()
     {
+        //TODO add BF16
         switch (PIMConfiguration::getPIMPrecision())
         {
             case INT8:

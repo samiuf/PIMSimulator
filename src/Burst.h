@@ -28,7 +28,7 @@ using namespace std;
 
 namespace DRAMSim
 {
-union BurstType
+union BurstType //TODO Add BF16
 {
     BurstType()
     {
@@ -347,14 +347,14 @@ union BurstType
     uint16_t u16Data_[16];
 };
 
-struct NumpyBurstType
+struct NumpyBurstType //TODO add BF16
 {
     vector<unsigned long> shape;
     vector<float> data;
     vector<uint16_t> u16Data;
     vector<unsigned long> bShape;
     vector<BurstType> bData;
-    enum precision
+    enum precision 
     {
         FP32,
         FP16

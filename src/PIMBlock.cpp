@@ -20,7 +20,7 @@
 #include "half.h"
 
 using namespace DRAMSim;
-
+//TODO Add BF16
 void PIMBlock::add(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
 {
     if (pimPrecision_ == FP16)
@@ -40,7 +40,7 @@ void PIMBlock::add(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
     else
         dstBst = src0Bst + src1Bst;
 }
-
+//TODO Add BF16
 void PIMBlock::mul(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
 {
     if (pimPrecision_ == FP16)
@@ -60,7 +60,7 @@ void PIMBlock::mul(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
     else
         dstBst = src0Bst * src1Bst;
 }
-
+//TODO Add BF16
 void PIMBlock::mac(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
 {
     if (pimPrecision_ == FP16)
@@ -83,7 +83,7 @@ void PIMBlock::mac(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
     else
         dstBst = src0Bst * src1Bst + dstBst;
 }
-
+//TODO Add BF16
 void PIMBlock::mad(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst, BurstType& src2Bst)
 {
     if (pimPrecision_ == FP16)

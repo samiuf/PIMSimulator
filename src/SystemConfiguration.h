@@ -115,6 +115,7 @@ enum PIMMode
     mac_in_bankgroup,
     mac_in_bank
 };
+//TODO Add BF16
 enum PIMPrecision
 {
     FP16,
@@ -423,7 +424,7 @@ class PIMConfiguration
         }
         throw invalid_argument("Invalid PIM mode");
     }
-
+    //TODO Add BF16
     static PIMPrecision getPIMPrecision()
     {
         string param = getConfigParam(STRING, "PIM_PRECISION");
