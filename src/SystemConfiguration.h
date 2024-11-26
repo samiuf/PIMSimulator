@@ -115,12 +115,13 @@ enum PIMMode
     mac_in_bankgroup,
     mac_in_bank
 };
-//TODO Add BF16
+
 enum PIMPrecision
 {
     FP16,
     INT8,
-    FP32
+    BF16,
+    FP32,
 };
 
 enum class dramMode
@@ -424,7 +425,7 @@ class PIMConfiguration
         }
         throw invalid_argument("Invalid PIM mode");
     }
-    //TODO Add BF16
+
     static PIMPrecision getPIMPrecision()
     {
         string param = getConfigParam(STRING, "PIM_PRECISION");
@@ -440,13 +441,17 @@ class PIMConfiguration
         {
             return FP32;
         }
+        else if (param == "BF16")
+        {
+            return BF16;
+        }
         throw invalid_argument("Invalid PIM precision");
     }
 
     static int getPIMDataLength()
     {
         string param = getConfigParam(STRING, "PIM_PRECISION");
-        if (param == "FP16")
+        if (param == "FP16" || param == "BF16")
         {
             return 2;
         }

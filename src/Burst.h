@@ -47,6 +47,11 @@ union BurstType //TODO Add BF16
         memcpy(u8Data_, x, 32);
     }
 
+    BurstType(biovault::bfloat16* x)
+    {
+        memcpy(u8Data_, x, 32);
+    }
+
     BurstType(float x0, float x1, float x2, float x3, float x4, float x5, float x6, float x7)
     {
         set(x0, x1, x2, x3, x4, x5, x6, x7);
@@ -54,6 +59,14 @@ union BurstType //TODO Add BF16
 
     BurstType(fp16 x0, fp16 x1, fp16 x2, fp16 x3, fp16 x4, fp16 x5, fp16 x6, fp16 x7, fp16 x8,
               fp16 x9, fp16 x10, fp16 x11, fp16 x12, fp16 x13, fp16 x14, fp16 x15)
+    {
+        set(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15);
+    }
+
+    BurstType(biovault::bfloat16 x0, biovault::bfloat16 x1, biovault::bfloat16 x2, biovault::bfloat16 x3, 
+              biovault::bfloat16 x4, biovault::bfloat16 x5, biovault::bfloat16 x6, biovault::bfloat16 x7, 
+              biovault::bfloat16 x8, biovault::bfloat16 x9, biovault::bfloat16 x10, biovault::bfloat16 x11, 
+              biovault::bfloat16 x12, biovault::bfloat16 x13, biovault::bfloat16 x14, biovault::bfloat16 x15)
     {
         set(x0, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, x13, x14, x15);
     }
@@ -77,6 +90,11 @@ union BurstType //TODO Add BF16
     }
 
     void set(fp16 x)
+    {
+        set(x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x);
+    }
+
+    void set(biovault::bfloat16_t x) //biovault::bfloat16_t
     {
         set(x, x, x, x, x, x, x, x, x, x, x, x, x, x, x, x);
     }
@@ -130,6 +148,29 @@ union BurstType //TODO Add BF16
         fp16Data_[13] = x13;
         fp16Data_[14] = x14;
         fp16Data_[15] = x15;
+    }
+
+    void set(biovault::bfloat16 x0, biovault::bfloat16 x1, biovault::bfloat16 x2, biovault::bfloat16 x3, 
+            biovault::bfloat16 x4, biovault::bfloat16 x5, biovault::bfloat16 x6, biovault::bfloat16 x7, 
+            biovault::bfloat16 x8, biovault::bfloat16 x9, biovault::bfloat16 x10, biovault::bfloat16 x11, 
+            biovault::bfloat16 x12, biovault::bfloat16 x13, biovault::bfloat16 x14, biovault::bfloat16 x15)
+    {
+        bf16Data_[0] = x0;
+        bf16Data_[1] = x1;
+        bf16Data_[2] = x2;
+        bf16Data_[3] = x3;
+        bf16Data_[4] = x4;
+        bf16Data_[5] = x5;
+        bf16Data_[6] = x6;
+        bf16Data_[7] = x7;
+        bf16Data_[8] = x8;
+        bf16Data_[9] = x9;
+        bf16Data_[10] = x10;
+        bf16Data_[11] = x11;
+        bf16Data_[12] = x12;
+        bf16Data_[13] = x13;
+        bf16Data_[14] = x14;
+        bf16Data_[15] = x15;
     }
 
     void set(uint16_t x0, uint16_t x1, uint16_t x2, uint16_t x3, uint16_t x4, uint16_t x5,
@@ -270,12 +311,36 @@ union BurstType //TODO Add BF16
         return true;
     }
 
+    bool bf16Similar(const BurstType& rhs, float epsilon)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            if ((convertH2F(bf16Data_[i]) - convertH2F(rhs.bf16Data_[i])) / //TODO Change this line
+                    convertH2F(bf16Data_[i]) >
+                epsilon)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
     fp16 fp16ReduceSum()
     {
         fp16 sum(0.0f);
         for (int i = 0; i < 16; i++)
         {
             sum += fp16Data_[i];
+        }
+        return sum;
+    }
+
+    biovault::bfloat16_t bf16ReduceSum()
+    {
+        biovault::bfloat16_t sum(0.0f);
+        for (int i = 0; i < 16; i++)
+        {
+            sum += bf16Data_[i];
         }
         return sum;
     }
@@ -288,6 +353,27 @@ union BurstType //TODO Add BF16
         for (int i = 0; i < numData; i++)
         {
             sum[i] = fp16Data_[i];
+        }
+        for (int i = 0; i < 4; i++)
+        {
+            numData = numData / 2;
+            for (int j = 0; j < numData; j++)
+            {
+                sum[j] = sum[j * 2] + sum[j * 2 + 1];
+            }
+        }
+
+        return sum[0];
+    }
+
+    biovault::bfloat16_t bf16AdderTree()
+    {
+        biovault::bfloat16_t sum[16];
+        int numData = 16;
+
+        for (int i = 0; i < numData; i++)
+        {
+            sum[i] = bf16Data_[i];
         }
         for (int i = 0; i < 4; i++)
         {
@@ -339,8 +425,30 @@ union BurstType //TODO Add BF16
         }
         return ret;
     }
+    
+    //BF16
+    BurstType operator+(const BurstType& rhs) const
+    {
+        BurstType ret;
+        for (int i = 0; i < 16; i++)
+        {
+            ret.bf16Data_[i] = bf16Data_[i] + rhs.bf16Data_[i];
+        }
+        return ret;
+    }
+    //BF16
+    BurstType operator*(const BurstType& rhs) const
+    {
+        BurstType ret;
+        for (int i = 0; i < 16; i++)
+        {
+            ret.bf16Data_[i] = bf16Data_[i] * rhs.bf16Data_[i];
+        }
+        return ret;
+    }
 
     fp16 fp16Data_[16];
+    biovault::bfloat16 bf16Data_[16];
     uint8_t u8Data_[32];
     float fp32Data_[8];
     uint32_t u32Data_[8];
