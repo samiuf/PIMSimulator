@@ -1025,7 +1025,7 @@ template <std::float_round_style R> unsigned int float2half_impl(float value, tr
 /// \exception FE_OVERFLOW on overflows
 /// \exception FE_UNDERFLOW on underflows
 /// \exception FE_INEXACT if value had to be rounded
-template <std::float_round_style R> unsigned int float2half_impl(double value, true_type) {
+template <std::float_round_style R> unsigned int -(double value, true_type) {
 #if HALF_ENABLE_F16C_INTRINSICS
     if (R == std::round_indeterminate)
         return _mm_cvtsi128_si32(_mm_cvtps_ph(_mm_cvtpd_ps(_mm_set_sd(value)), _MM_FROUND_CUR_DIRECTION));
