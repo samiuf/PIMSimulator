@@ -23,6 +23,7 @@
 
 #include "FP16.h"
 #include "npy.h"
+#include "biovault_bfloat16.h"
 
 using namespace std;
 

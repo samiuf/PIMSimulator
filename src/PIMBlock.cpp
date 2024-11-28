@@ -37,6 +37,13 @@ void PIMBlock::add(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
             dstBst.fp32Data_[i] = src0Bst.fp32Data_[i] + src1Bst.fp32Data_[i];
         }
     }
+    else if (pimPrecision_ == BF16) 
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            dstBst.bf16Data_[i] = src0Bst.bf16Data_[i] + src1Bst.bf16Data_[i];
+        }
+    }
     else
         dstBst = src0Bst + src1Bst;
 }
@@ -55,6 +62,13 @@ void PIMBlock::mul(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
         for (int i = 0; i < 8; i++)
         {
             dstBst.fp32Data_[i] = src0Bst.fp32Data_[i] * src1Bst.fp32Data_[i];
+        }
+    }
+    else if (pimPrecision_ == BF16)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            dstBst.bf16Data_[i] = src0Bst.bf16Data_[i] * src1Bst.bf16Data_[i];
         }
     }
     else
@@ -80,6 +94,16 @@ void PIMBlock::mac(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst)
             dstBst.fp32Data_[i] = src0Bst.fp32Data_[i] * src1Bst.fp32Data_[i] + dstBst.fp32Data_[i];
         }
     }
+    else if (pimPrecision_ == BF16)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            dstBst.bf16Data_[i] = src0Bst.bf16Data_[i] * src1Bst.bf16Data_[i] + dstBst.bf16Data_[i];
+        }
+
+        // DEBUG("MAC " << src0Bst.hexToStr2() << "*+" << src1Bst.hexToStr2() << ""
+        //              << dstBst.hexToStr2());
+    }
     else
         dstBst = src0Bst * src1Bst + dstBst;
 }
@@ -100,6 +124,14 @@ void PIMBlock::mad(BurstType& dstBst, BurstType& src0Bst, BurstType& src1Bst, Bu
         {
             dstBst.fp32Data_[i] =
                 src0Bst.fp32Data_[i] * src1Bst.fp32Data_[i] + src2Bst.fp32Data_[i];
+        }
+    }
+    else if (pimPrecision_ == BF16)
+    {
+        for (int i = 0; i < 16; i++)
+        {
+            dstBst.bf16Data_[i] =
+                src0Bst.bf16Data_[i] * src1Bst.bf16Data_[i] + src2Bst.bf16Data_[i];
         }
     }
     else
