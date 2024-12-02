@@ -49,6 +49,7 @@ TEST_F(PIMKernelFixture, gemv_tree)
     for (int i = 0; i < output_dim; i++)
     {
         kernel->adderTree(&result_[i], output_dim, numInputTile, 0, temp_fp16);
+        // second param is the correct result
         EXPECT_FP16_EQ(temp_fp16[0], dim_data->output_npbst_.getBurst(0).fp16Data_[i]);
         reduced_result_[i / 16].fp16Data_[i % 16] = temp_fp16[0];
     }

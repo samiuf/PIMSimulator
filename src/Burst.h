@@ -312,19 +312,19 @@ union BurstType //TODO Add BF16
         return true;
     }
 
-    bool bf16Similar(const BurstType& rhs, float epsilon)
-    {
-        for (int i = 0; i < 16; i++)
-        {
-            if ((convertH2F(bf16Data_[i]) - convertH2F(rhs.bf16Data_[i])) / //TODO Change this line
-                    convertH2F(bf16Data_[i]) >
-                epsilon)
-            {
-                return false;
-            }
-        }
-        return true;
-    }
+    // bool bf16Similar(const BurstType& rhs, float epsilon)
+    // {
+    //     for (int i = 0; i < 16; i++)
+    //     {
+    //         if ((convertH2F(bf16Data_[i]) - convertH2F(rhs.bf16Data_[i])) / //TODO Change this line
+    //                 convertH2F(bf16Data_[i]) >
+    //             epsilon)
+    //         {
+    //             return false;
+    //         }
+    //     }
+    //     return true;
+    // }
 
     fp16 fp16ReduceSum()
     {
@@ -408,24 +408,24 @@ union BurstType //TODO Add BF16
         return (memcmp(this, &rhs, 32));
     }
 
-    BurstType operator+(const BurstType& rhs) const
-    {
-        BurstType ret;
-        for (int i = 0; i < 16; i++)
-        {
-            ret.fp16Data_[i] = fp16Data_[i] + rhs.fp16Data_[i];
-        }
-        return ret;
-    }
-    BurstType operator*(const BurstType& rhs) const
-    {
-        BurstType ret;
-        for (int i = 0; i < 16; i++)
-        {
-            ret.fp16Data_[i] = fp16Data_[i] * rhs.fp16Data_[i];
-        }
-        return ret;
-    }
+    // BurstType operator+(const BurstType& rhs) const
+    // {
+    //     BurstType ret;
+    //     for (int i = 0; i < 16; i++)
+    //     {
+    //         ret.fp16Data_[i] = fp16Data_[i] + rhs.fp16Data_[i];
+    //     }
+    //     return ret;
+    // }
+    // BurstType operator*(const BurstType& rhs) const
+    // {
+    //     BurstType ret;
+    //     for (int i = 0; i < 16; i++)
+    //     {
+    //         ret.fp16Data_[i] = fp16Data_[i] * rhs.fp16Data_[i];
+    //     }
+    //     return ret;
+    // }
     
     //BF16
     BurstType operator+(const BurstType& rhs) const
@@ -466,7 +466,8 @@ struct NumpyBurstType //TODO add BF16
     enum precision 
     {
         FP32,
-        FP16
+        FP16,
+        BF16
     };
 
     BurstType& getBurst(int x, int y)
@@ -502,6 +503,22 @@ struct NumpyBurstType //TODO add BF16
     }
 
     void loadFp16(string filename)
+    {
+        npy::LoadArrayFromNumpy(filename, shape, u16Data);
+        loadTobShape((double)16);
+        for (int i = 0; i < u16Data.size(); i += 16)
+        {
+            BurstType burst((u16Data[i]), (u16Data[i + 1]), (u16Data[i + 2]), (u16Data[i + 3]),
+                            (u16Data[i + 4]), (u16Data[i + 5]), (u16Data[i + 6]), (u16Data[i + 7]),
+                            (u16Data[i + 8]), (u16Data[i + 9]), (u16Data[i + 10]),
+                            (u16Data[i + 11]), (u16Data[i + 12]), (u16Data[i + 13]),
+                            (u16Data[i + 14]), (u16Data[i + 15]));
+            bData.push_back(burst);
+        }
+    }
+
+    //TODO
+    void loadBf16(string filename)
     {
         npy::LoadArrayFromNumpy(filename, shape, u16Data);
         loadTobShape((double)16);
