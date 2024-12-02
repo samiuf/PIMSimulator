@@ -50,8 +50,8 @@ def build(target_name, base_path, build_flags):
     build_sources = getSources("build")
     env.Program(target=target_name["binary"],
                 source=build_sources,
-                CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                LIBPATH=['.'], LIBS=['gtest', 'pthread'])
+                CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"], "/opt/homebrew/Cellar/googletest/1.15.2/include"],
+                LIBPATH=['.', "/opt/homebrew/Cellar/googletest/1.15.2/lib"], LIBS=['gtest', 'gtest_main', 'pthread'])
 
     no_lib = ARGUMENTS.get('NO_LIBRARY', 0)
     if int(no_lib) == 0:
@@ -60,14 +60,14 @@ def build(target_name, base_path, build_flags):
         env.StaticLibrary(target=target_name["library"],
                           source=lib_sources,
                           CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                          LIBPATH=['.'],
-                          LIBS=['gtest', 'pthread'])
+                          LIBPATH=['.', "/opt/homebrew/Cellar/googletest/1.15.2/lib"],
+                          LIBS=['gtest', 'gtest_main', 'pthread'])
         # print ("Creating a shared library from objects")
         env.SharedLibrary(target=target_name["library"],
                           source=lib_sources,
                           CPPPATH=[base_path["lib"], base_path["source"], base_path["tools"]],
-                          LIBPATH=['.'],
-                          LIBS=['gtest', 'pthread'])
+                          LIBPATH=['.', "/opt/homebrew/Cellar/googletest/1.15.2/lib"],
+                          LIBS=['gtest', 'gtest_main', 'pthread'])
 
 
 root_path = Dir('.').abspath
