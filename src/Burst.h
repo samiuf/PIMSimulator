@@ -517,7 +517,6 @@ struct NumpyBurstType //TODO add BF16
         }
     }
 
-    //TODO
     void loadBf16(string filename)
     {
         npy::LoadArrayFromNumpy(filename, shape, u16Data);
@@ -547,6 +546,25 @@ struct NumpyBurstType //TODO add BF16
             BurstType burst(dataF2H[0], dataF2H[1], dataF2H[2], dataF2H[3], dataF2H[4], dataF2H[5],
                             dataF2H[6], dataF2H[7], dataF2H[8], dataF2H[9], dataF2H[10],
                             dataF2H[11], dataF2H[12], dataF2H[13], dataF2H[14], dataF2H[15]);
+            bData.push_back(burst);
+        }
+    }
+    
+    //TODO
+    void loadBf16FromFp32(string filename)
+    {
+        npy::LoadArrayFromNumpy(filename, shape, data);
+        loadTobShape((double)16);
+        for (int i = 0; i < data.size(); i += 16)
+        {
+            biovault::bfloat16_t dataF2B[16];
+            for (int j = 0; j < 16; j++)
+            {
+                dataF2B[j] = biovault::bfloat16_t(data[i + j]);
+            }
+            BurstType burst(dataF2B[0], dataF2B[1], dataF2B[2], dataF2B[3], dataF2B[4], dataF2B[5],
+                            dataF2B[6], dataF2B[7], dataF2B[8], dataF2B[9], dataF2B[10],
+                            dataF2B[11], dataF2B[12], dataF2B[13], dataF2B[14], dataF2B[15]);
             bData.push_back(burst);
         }
     }

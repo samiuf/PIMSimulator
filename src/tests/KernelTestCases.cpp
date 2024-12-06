@@ -83,6 +83,29 @@ TEST_F(PIMKernelFixture, gemv)
     delete dim_data;
 }
 
+TEST_F(PIMKernelFixture, gemv_bf16)
+{
+    shared_ptr<PIMKernel> kernel = make_pim_kernel();
+
+    uint32_t batch_size = 1;
+    uint32_t output_dim = 4096;
+    uint32_t input_dim = 1024;
+
+    DataDim *dim_data = new DataDim(KernelType::GEMV, batch_size, output_dim, input_dim, true);
+    dim_data->printDim(KernelType::GEMV);
+
+    reduced_result_ = new BurstType[dim_data->dimTobShape(output_dim)];
+    result_ = getResultPIM(KernelType::GEMV, dim_data, kernel, result_);
+
+    testStatsClear();
+    expectAccuracy_bf16(KernelType::GEMV, output_dim, dim_data->output_npbst_,
+                   dim_data->getNumElementsPerBlocks());
+
+    delete[] result_;
+    delete[] reduced_result_;
+    delete dim_data;
+}
+
 TEST_F(PIMKernelFixture, mul)
 {
     shared_ptr<PIMKernel> kernel = make_pim_kernel();
@@ -99,6 +122,27 @@ TEST_F(PIMKernelFixture, mul)
 
     testStatsClear();
     expectAccuracy(KernelType::MUL, dim_data->dimTobShape(output_dim), dim_data->output_npbst_);
+
+    delete[] result_;
+    delete dim_data;
+}
+
+TEST_F(PIMKernelFixture, mul_bf16)
+{
+    shared_ptr<PIMKernel> kernel = make_pim_kernel();
+
+    uint32_t batch_size = 1;
+    uint32_t output_dim = 1024 * 1024;
+    uint32_t input_dim = output_dim;
+
+    DataDim *dim_data = new DataDim(KernelType::MUL, batch_size, output_dim, input_dim, true);
+    dim_data->printDim(KernelType::MUL);
+
+    result_ = getResultPIM(KernelType::MUL, dim_data, kernel, result_);
+    kernel->runPIM();
+
+    testStatsClear();
+    expectAccuracy_bf16(KernelType::MUL, dim_data->dimTobShape(output_dim), dim_data->output_npbst_);
 
     delete[] result_;
     delete dim_data;
@@ -125,7 +169,28 @@ TEST_F(PIMKernelFixture, add)
     delete dim_data;
 }
 
-TEST_F(PIMKernelFixture, relu)
+TEST_F(PIMKernelFixture, add_bf16)
+{
+    shared_ptr<PIMKernel> kernel = make_pim_kernel();
+
+    uint32_t batch_size = 1;
+    uint32_t output_dim = 1024 * 1024;
+    uint32_t input_dim = output_dim;
+
+    DataDim *dim_data = new DataDim(KernelType::ADD, batch_size, output_dim, input_dim, true);
+    dim_data->printDim(KernelType::ADD);
+
+    result_ = getResultPIM(KernelType::ADD, dim_data, kernel, result_);
+    kernel->runPIM();
+
+    testStatsClear();
+    expectAccuracy_bf16(KernelType::ADD, dim_data->dimTobShape(output_dim), dim_data->output_npbst_);
+
+    delete[] result_;
+    delete dim_data;
+}
+
+TEST_F(PIMKernelFixture, relu) 
 {
     shared_ptr<PIMKernel> kernel = make_pim_kernel();
     uint32_t output_dim = 1024 * 1024;
@@ -139,6 +204,25 @@ TEST_F(PIMKernelFixture, relu)
 
     testStatsClear();
     expectAccuracy(KernelType::RELU, dim_data->dimTobShape(output_dim), dim_data->output_npbst_);
+
+    delete[] result_;
+    delete dim_data;
+}
+
+TEST_F(PIMKernelFixture, relu_bf16) 
+{
+    shared_ptr<PIMKernel> kernel = make_pim_kernel();
+    uint32_t output_dim = 1024 * 1024;
+    uint32_t input_dim = output_dim;
+
+    DataDim *dim_data = new DataDim(KernelType::RELU, 1, output_dim, input_dim, true);
+    dim_data->printDim(KernelType::RELU);
+
+    result_ = getResultPIM(KernelType::RELU, dim_data, kernel, result_);
+    kernel->runPIM();
+
+    testStatsClear();
+    expectAccuracy_bf16(KernelType::RELU, dim_data->dimTobShape(output_dim), dim_data->output_npbst_);
 
     delete[] result_;
     delete dim_data;

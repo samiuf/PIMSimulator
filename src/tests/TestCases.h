@@ -21,6 +21,7 @@
 
 #include "Burst.h"
 #include "FP16.h"
+#include "biovault_bfloat16.h"
 #include "gtest/gtest.h"
 #include "tests/PIMKernel.h"
 
@@ -174,11 +175,11 @@ class DataDim
                     // output_npbst_.loadFp16("data/gemv/gemv_output_batch_" + batch_in_out_dim_str +
                     //                        ".npy");
 
-                    input_npbst_.loadBf16("data/gemv_bf16/gemv_input_batch_" + batch_in_out_dim_str +
+                    input_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_input_batch_" + batch_in_out_dim_str +
                                           ".npy");
-                    weight_npbst_.loadBf16("data/gemv_bf16/gemv_weight_batch_" + batch_in_out_dim_str +
+                    weight_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_weight_batch_" + batch_in_out_dim_str +
                                            ".npy");
-                    output_npbst_.loadBf16("data/gemv/gemv_output_batch_" + batch_in_out_dim_str +
+                    output_npbst_.loadBf16FromFp32("data/gemv/gemv_output_batch_" + batch_in_out_dim_str +
                                            ".npy");
                 }
                 else
@@ -187,9 +188,9 @@ class DataDim
                     // weight_npbst_.loadFp16("data/gemv/gemv_weight_" + in_out_dim_str + ".npy");
                     // output_npbst_.loadFp16("data/gemv/gemv_output_" + in_out_dim_str + ".npy");
 
-                     input_npbst_.loadBf16("data/gemv_bf16/gemv_input_" + in_out_dim_str + ".npy");
-                    weight_npbst_.loadBf16("data/gemv_bf16/gemv_weight_" + in_out_dim_str + ".npy");
-                    output_npbst_.loadBf16("data/gemv_bf16/gemv_output_" + in_out_dim_str + ".npy");
+                     input_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_input_" + in_out_dim_str + ".npy");
+                    weight_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_weight_" + in_out_dim_str + ".npy");
+                    output_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_output_" + in_out_dim_str + ".npy");
                 }
 
                 // output_dim_ = weight_npbst_.bShape[0];

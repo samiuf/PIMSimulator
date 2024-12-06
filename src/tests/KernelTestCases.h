@@ -18,6 +18,7 @@
 
 #include "tests/TestCases.h"
 
+
 using namespace DRAMSim;
 
 // A predicate-formatter for asserting that two integers are mutually prime.
@@ -26,6 +27,14 @@ using namespace DRAMSim;
                                               DRAMSim::BurstType mb, DRAMSim::BurstType nb);
 #define EXPECT_FP16_BST_EQ(val1, val2) EXPECT_PRED_FORMAT2(fp16BstEqualHelper, val1, val2)
 #define EXPECT_FP16_EQ(val1, val2) EXPECT_PRED_FORMAT2(fp16EqualHelper, val1, val2)
+
+// A predicate-formatter for asserting that two integers are mutually prime. (BF16 Version)
+::testing::AssertionResult bf16EqualHelper(const char* m_expr, const char* n_expr, biovault::bfloat16_t m, biovault::bfloat16_t n);
+::testing::AssertionResult bf16BstEqualHelper(const char* m_expr, const char* n_expr,
+                                              DRAMSim::BurstType mb, DRAMSim::BurstType nb);
+#define EXPECT_BF16_BST_EQ(val1, val2) EXPECT_PRED_FORMAT2(bf16BstEqualHelper, val1, val2)
+#define EXPECT_BF16_EQ(val1, val2) EXPECT_PRED_FORMAT2(bf16EqualHelper, val1, val2)
+
 
 class TestStats
 {
@@ -200,6 +209,39 @@ class PIMKernelFixture : public testing::Test
         }
     }
 
+    void expectAccuracy_bf16(KernelType kn_type, int num_tests, NumpyBurstType precalculated_result,
+                        uint32_t stride = 16)
+    {
+        switch (kn_type)
+        {
+            case KernelType::GEMV:
+            {
+                for (int i = 0; i < num_tests; i++)
+                {
+                    EXPECT_BF16_EQ(result_[i].bf16ReduceSum(),
+                                   precalculated_result.getBurst(0).bf16Data_[i]);
+                    reduced_result_[i / stride].bf16Data_[i % stride] = result_[i].bf16ReduceSum();
+                }
+                return;
+            }
+            case KernelType::ADD:
+            case KernelType::MUL:
+            case KernelType::RELU:
+            {
+                for (int i = 0; i < num_tests; i++)
+                {
+                    EXPECT_BF16_BST_EQ(result_[i], precalculated_result.getBurst(i));
+                }
+                return;
+            }
+            default:
+            {
+                ERROR("== Error - Unknown KernelType trying to run");
+                return;
+            }
+        }
+    }
+
     shared_ptr<PIMKernel> make_pim_kernel()
     {
         shared_ptr<MultiChannelMemorySystem> mem = make_shared<MultiChannelMemorySystem>(
@@ -276,6 +318,31 @@ class PIMKernelFixture : public testing::Test
     }
 }
 
+::testing::AssertionResult bf16EqualHelper(const char* m_expr, const char* n_expr, biovault::bfloat16_t m, biovault::bfloat16_t n)
+{
+    uint16_t mi = biovault::get_raw_bits(m);
+    uint16_t ni = biovault::get_raw_bits(n);
+    unsigned cur_idx = GET_NUM_TESTS();
+    if (m == n) //TODO probably need to write a bf16Equal helper function
+    {
+        INC_NUM_PASSED();
+        return ::testing::AssertionSuccess();
+    }
+    else if (m == n)
+    {
+        INC_NUM_PASSED();
+        return ::testing::AssertionSuccess();
+    }
+    else
+    {
+        INSERT_TO_FAILED_VECTOR(m, n);
+        INC_NUM_FAILED();
+        return ::testing::AssertionFailure()
+               << cur_idx << m_expr << " and " << n_expr << " (" << m << " and "
+               << n << ") are not same " << mi << " " << ni;
+    }
+}
+
 ::testing::AssertionResult fp16BstEqualHelper(const char* m_expr, const char* n_expr, BurstType mb,
                                               BurstType nb)
 {
@@ -301,6 +368,37 @@ class PIMKernelFixture : public testing::Test
             return ::testing::AssertionFailure()
                    << m_expr << " and " << n_expr << " (" << convertH2F(m) << " and "
                    << convertH2F(n) << ") are not same " << mi.ival << " " << ni.ival;
+        }
+    }
+
+    return ::testing::AssertionSuccess();
+}
+
+::testing::AssertionResult bf16BstEqualHelper(const char* m_expr, const char* n_expr, BurstType mb,
+                                              BurstType nb)
+{
+    for (int i = 0; i < 16; i++)
+    {
+        biovault::bfloat16_t m = mb.bf16Data_[i];
+        biovault::bfloat16_t n = nb.bf16Data_[i];
+        uint16_t mi = biovault::get_raw_bits(m);
+        uint16_t ni = biovault::get_raw_bits(n);
+
+        if (m == n)
+        {
+            INC_NUM_PASSED();
+        }
+        else if (m == n)
+        {
+            INC_NUM_PASSED();
+        }
+        else
+        {
+            INC_NUM_FAILED();
+            INSERT_TO_FAILED_VECTOR(m, n);
+            return ::testing::AssertionFailure()
+                   << m_expr << " and " << n_expr << " (" << m << " and "
+                   << n << ") are not same " << mi << " " << ni;
         }
     }
 
