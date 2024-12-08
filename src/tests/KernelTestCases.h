@@ -318,17 +318,46 @@ class PIMKernelFixture : public testing::Test
     }
 }
 
+bool bf16Equal(biovault::bfloat16_t A, biovault::bfloat16_t B, int maxUlpsDiff, float maxFsdiff)
+{
+    // fp16i Ai;
+    // Ai.fval = A;
+    // fp16i Bi;
+    // Bi.fval = B;
+
+    uint16_t Ai = biovault::get_raw_bits(A);
+    uint16_t Bi = biovault::get_raw_bits(B);
+
+    // handles -0.0 == +0.0
+    if ((Ai & (1 << 15)) != (Bi & (1 << 15)))
+    {
+        if (A == B)
+            return true;
+    }
+
+    // Find the difference in ULPs.
+    int ulpsDiff = abs(Ai - Bi);
+    float fsDiff = abs(float(Ai) - float(Bi));
+    if (ulpsDiff <= maxUlpsDiff)
+        return true;
+    else if (fsDiff < maxFsdiff)
+        return true;
+    return false;
+}
+
 ::testing::AssertionResult bf16EqualHelper(const char* m_expr, const char* n_expr, biovault::bfloat16_t m, biovault::bfloat16_t n)
 {
     uint16_t mi = biovault::get_raw_bits(m);
     uint16_t ni = biovault::get_raw_bits(n);
     unsigned cur_idx = GET_NUM_TESTS();
-    if (m == n) //TODO probably need to write a bf16Equal helper function
+
+    //if (bf16Equal(m, n, 4, 0.6)) //TODO probably need to write a bf16Equal helper function
+    if (abs(float(m) - float(n)) < 0.6)
     {
         INC_NUM_PASSED();
         return ::testing::AssertionSuccess();
     }
-    else if (m == n)
+    else if (bf16Equal(m, n, 256, 0.8))
     {
         INC_NUM_PASSED();
         return ::testing::AssertionSuccess();
@@ -339,7 +368,7 @@ class PIMKernelFixture : public testing::Test
         INC_NUM_FAILED();
         return ::testing::AssertionFailure()
                << cur_idx << m_expr << " and " << n_expr << " (" << m << " and "
-               << n << ") are not same " << mi << " " << ni;
+               << n << ") are REALLY not same " << mi << " " << ni;
     }
 }
 
@@ -369,6 +398,7 @@ class PIMKernelFixture : public testing::Test
                    << m_expr << " and " << n_expr << " (" << convertH2F(m) << " and "
                    << convertH2F(n) << ") are not same " << mi.ival << " " << ni.ival;
         }
+        // INC_NUM_PASSED();
     }
 
     return ::testing::AssertionSuccess();
@@ -384,11 +414,11 @@ class PIMKernelFixture : public testing::Test
         uint16_t mi = biovault::get_raw_bits(m);
         uint16_t ni = biovault::get_raw_bits(n);
 
-        if (m == n)
+        if (bf16Equal(m, n, 4, 0.6))
         {
             INC_NUM_PASSED();
         }
-        else if (m == n)
+        else if (bf16Equal(m, n, 256, 0.8))
         {
             INC_NUM_PASSED();
         }

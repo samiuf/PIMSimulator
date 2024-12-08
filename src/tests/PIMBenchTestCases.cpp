@@ -29,6 +29,14 @@ TEST_F(PIMBenchFixture, gemv)
     expectPIMBench(2.0);
 }
 
+TEST_F(PIMBenchFixture, gemv_bf16)
+{
+    setPIMBenchTestCase(KernelType::GEMV, 4096, 4096);  // (KernelType, out_vec, in_vec)
+    executeKernel();                                    // execute w/o PIM
+    executePIMKernel();                                 // execute w/ PIM
+    expectPIMBench(2.0);
+}
+
 TEST_F(PIMBenchFixture, mul)
 {
     setPIMBenchTestCase(KernelType::MUL, 2 * 1024 * 1024, 2 * 1024 * 1024);
