@@ -414,7 +414,7 @@ bool bf16Equal(biovault::bfloat16_t A, biovault::bfloat16_t B, int maxUlpsDiff, 
         uint16_t mi = biovault::get_raw_bits(m);
         uint16_t ni = biovault::get_raw_bits(n);
 
-        if (bf16Equal(m, n, 4, 0.6))
+        if (abs(float(m) - float(n)) < 0.6)
         {
             INC_NUM_PASSED();
         }
