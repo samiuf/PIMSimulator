@@ -179,7 +179,7 @@ class DataDim
                                           ".npy");
                     weight_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_weight_batch_" + batch_in_out_dim_str +
                                            ".npy");
-                    output_npbst_.loadBf16FromFp32("data/gemv/gemv_output_batch_" + batch_in_out_dim_str +
+                    output_npbst_.loadBf16FromFp32("data/gemv_bf16/gemv_output_batch_" + batch_in_out_dim_str +
                                            ".npy");
                 }
                 else
@@ -205,9 +205,9 @@ class DataDim
                 // input1_npbst_.loadFp16("data/add/resadd_input1_" + input_dim_str + ".npy");
                 // output_npbst_.loadFp16("data/add/resadd_output_" + input_dim_str + ".npy");
 
-                input_npbst_.loadFp16 ("data/add_bf16/resadd_input0_" + input_dim_str + ".npy");
-                input1_npbst_.loadFp16("data/add_bf16/resadd_input1_" + input_dim_str + ".npy");
-                output_npbst_.loadFp16("data/add_bf16/resadd_output_" + input_dim_str + ".npy");
+                input_npbst_.loadBf16FromFp32 ("data/add_bf16/resadd_input0_" + input_dim_str + ".npy");
+                input1_npbst_.loadBf16FromFp32("data/add_bf16/resadd_input1_" + input_dim_str + ".npy");
+                output_npbst_.loadBf16FromFp32("data/add_bf16/resadd_output_" + input_dim_str + ".npy");
 
                 output_dim_ = bShape1ToDim(output_npbst_.getTotalDim());
                 input_dim_ = bShape1ToDim(input_npbst_.getTotalDim());
@@ -217,9 +217,9 @@ class DataDim
             }
             case KernelType::MUL:
             {
-                input_npbst_.loadFp16 ("data/mul_bf16/eltmul_input0_" + input_dim_str + ".npy");
-                input1_npbst_.loadFp16("data/mul_bf16/eltmul_input1_" + input_dim_str + ".npy");
-                output_npbst_.loadFp16("data/mul_bf16/eltmul_output_" + input_dim_str + ".npy");
+                input_npbst_.loadBf16FromFp32 ("data/mul_bf16/eltmul_input0_" + input_dim_str + ".npy");
+                input1_npbst_.loadBf16FromFp32("data/mul_bf16/eltmul_input1_" + input_dim_str + ".npy");
+                output_npbst_.loadBf16FromFp32("data/mul_bf16/eltmul_output_" + input_dim_str + ".npy");
 
                 output_dim_ = bShape1ToDim(output_npbst_.getTotalDim());
                 input_dim_ = bShape1ToDim(input_npbst_.getTotalDim());

@@ -22,9 +22,9 @@ data_out = data_in1 + data_in2
 
 data_out = float32_to_bfloat16(data_out)
 
-np.save("eltmul_input0_" + str(DIM_IN), data_in1)
-np.save("eltmul_input1_" + str(DIM_IN), data_in2)
-np.save("eltmul_output_" + str(DIM_IN), data_out)
+np.save("resadd_input0_" + str(DIM_IN), data_in1)
+np.save("resadd_input1_" + str(DIM_IN), data_in2)
+np.save("resadd_output_" + str(DIM_IN), data_out)
 
 print(data_in1)
 print(data_in2)

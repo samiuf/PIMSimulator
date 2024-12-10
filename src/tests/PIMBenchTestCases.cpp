@@ -45,7 +45,23 @@ TEST_F(PIMBenchFixture, mul)
     expectPIMBench(2.0);
 }
 
+TEST_F(PIMBenchFixture, mul_bf16)
+{
+    setPIMBenchTestCase(KernelType::MUL, 2 * 1024 * 1024, 2 * 1024 * 1024);
+    executeKernel();
+    executePIMKernel();
+    expectPIMBench(2.0);
+}
+
 TEST_F(PIMBenchFixture, add)
+{
+    setPIMBenchTestCase(KernelType::ADD, 1024 * 1024, 1024 * 1024);
+    executeKernel();
+    executePIMKernel();
+    expectPIMBench(2.0);
+}
+
+TEST_F(PIMBenchFixture, add_bf16)
 {
     setPIMBenchTestCase(KernelType::ADD, 1024 * 1024, 1024 * 1024);
     executeKernel();
